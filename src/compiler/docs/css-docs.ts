@@ -37,11 +37,9 @@ function parseCssComment(cssProps: d.CssCustomProperty[], comment: string) {
   lines.forEach(ln => {
     let line = ln.trim();
 
-    if (!line.startsWith(`*`)) {
-      return;
+    while (line.startsWith('*')) {
+      line = line.substring(1).trim();
     }
-
-    line = line.substring(1).trim();
 
     if (!line.startsWith(CSS_PROP_KEYWORD)) {
       return;

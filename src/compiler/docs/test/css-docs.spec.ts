@@ -24,6 +24,8 @@ describe('css-docs', () => {
       /**
        * @prop --max-width: Max width of the alert
        * @prop --color: Descript with : in it
+       * * @prop --background: background description
+       @prop --font-weight: font-weight description
        */
 
       html {
@@ -35,6 +37,8 @@ describe('css-docs', () => {
        * @prop --font-size: font-size description
        */
 
+      /** @prop --padding: padding description */
+
       body {
         color: red;
       }
@@ -43,8 +47,11 @@ describe('css-docs', () => {
     expect(cssDocs).toEqual([
       { name: `--max-width`, description: `Max width of the alert` },
       { name: `--color`, description: `Descript with : in it` },
+      { name: `--background`, description: `background description` },
+      { name: `--font-weight`, description: `font-weight description` },
       { name: `--border`, description: `border description` },
-      { name: `--font-size`, description: `font-size description` }
+      { name: `--font-size`, description: `font-size description` },
+      { name: `--padding`, description: `padding description` },
     ]);
   });
 
@@ -54,8 +61,6 @@ describe('css-docs', () => {
        * hello
        * @prop max-width: Max width of the alert
        * --max-width: Max width of the alert
-       * * @prop --max-width: Max width of the alert
-       @prop --max-width: Max width of the alert
        */
       /*
        * @prop --max-width

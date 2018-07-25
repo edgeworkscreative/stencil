@@ -1,48 +1,41 @@
 import * as d from '../../declarations';
+import { MarkdownTable } from './docs-util';
 
 
 export class MarkdownCssCustomProperties {
-  private rows: Row[] = [];
+  private cssProps: d.CssCustomProperty[] = [];
 
   addRow(cssProp: d.CssCustomProperty) {
-    this.rows.push(new Row(cssProp.name, cssProp.description));
+    this.cssProps.push(cssProp);
   }
 
   toMarkdown() {
     const content: string[] = [];
-    if (!this.rows.length) {
+    if (!this.cssProps.length) {
       return content;
     }
 
     content.push(`## CSS Custom Properties`);
     content.push(``);
 
-    this.rows = this.rows.sort((a, b) => {
-      if (a.propName < b.propName) return -1;
-      if (a.propName > b.propName) return 1;
+    this.cssProps = this.cssProps.sort((a, b) => {
+      if (a.name < b.name) return -1;
+      if (a.name > b.name) return 1;
       return 0;
     });
 
-    this.rows.forEach(row => {
-      content.push(...row.toMarkdown());
+    const table = new MarkdownTable();
+
+    table.addHeader(['Name', 'Description']);
+
+    this.cssProps.forEach(cssProp => {
+      table.addRow([
+        '`' + cssProp.name + '`',
+        cssProp.description
+      ]);
     });
 
-    return content;
-  }
-}
-
-
-class Row {
-
-  constructor(public propName: string, private description: string) {}
-
-  toMarkdown() {
-    const content: string[] = [];
-
-    content.push(`#### ${this.propName}`);
-    content.push(``);
-    content.push(this.description);
-    content.push(``);
+    content.push(...table.toMarkdown());
     content.push(``);
 
     return content;
