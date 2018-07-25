@@ -6,7 +6,6 @@ import { MarkdownEvents } from './markdown-events';
 import { MarkdownMethods } from './markdown-methods';
 import { MarkdownProps } from './markdown-props';
 import { MEMBER_TYPE } from '../../util/constants';
-import { parseCssCustomProperties } from './css-custom-properties';
 
 
 export function addAutoGenerate(cmpMeta: d.ComponentMeta, content: string[]) {
@@ -14,7 +13,8 @@ export function addAutoGenerate(cmpMeta: d.ComponentMeta, content: string[]) {
   content.push(``);
   content.push(``);
 
-  content.push(...generateMemberMarkdown(cmpMeta));
+  const markdownContent = generateMemberMarkdown(cmpMeta);
+  content.push(...markdownContent);
 
   content.push(``);
   content.push(`----------------------------------------------`);
@@ -50,7 +50,9 @@ function generateMemberMarkdown(cmpMeta: d.ComponentMeta) {
     events.addRow(ev);
   });
 
-  parseCssCustomProperties(cssCustomProps, cmpMeta);
+  cmpMeta.cssCustomProperties && cmpMeta.cssCustomProperties.forEach(cssProp => {
+    cssCustomProps.addRow(cssProp);
+  });
 
   return [
     ...props.toMarkdown(),

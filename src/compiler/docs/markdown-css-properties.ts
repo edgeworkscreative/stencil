@@ -1,9 +1,11 @@
+import * as d from '../../declarations';
+
 
 export class MarkdownCssCustomProperties {
   private rows: Row[] = [];
 
-  addRow(cssPropName: string, description: string) {
-    this.rows.push(new Row(cssPropName, description));
+  addRow(cssProp: d.CssCustomProperty) {
+    this.rows.push(new Row(cssProp.name, cssProp.description));
   }
 
   toMarkdown() {
@@ -16,8 +18,8 @@ export class MarkdownCssCustomProperties {
     content.push(``);
 
     this.rows = this.rows.sort((a, b) => {
-      if (a.cssPropName < b.cssPropName) return -1;
-      if (a.cssPropName > b.cssPropName) return 1;
+      if (a.propName < b.propName) return -1;
+      if (a.propName > b.propName) return 1;
       return 0;
     });
 
@@ -32,12 +34,12 @@ export class MarkdownCssCustomProperties {
 
 class Row {
 
-  constructor(public cssPropName: string, private description: string) {}
+  constructor(public propName: string, private description: string) {}
 
   toMarkdown() {
     const content: string[] = [];
 
-    content.push(`#### ${this.cssPropName}()`);
+    content.push(`#### ${this.propName}`);
     content.push(``);
     content.push(this.description);
     content.push(``);
