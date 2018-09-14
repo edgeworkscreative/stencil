@@ -1,24 +1,23 @@
 import * as d from '../../../declarations';
-import { BuildEvents } from '../../events';
 import { FsWatchNormalizer } from '../fs-watch-normalizer';
-import { mockConfig } from '../../../testing/mocks';
+import {mockCompilerCtx, mockConfig} from '../../../testing/mocks';
 
 
 describe('FsWatchNormalizer', () => {
 
   const config = mockConfig();
   let w: FsWatchNormalizer;
-  let events: BuildEvents;
+  let compilerCtx: d.CompilerCtx;
 
   beforeEach(() => {
-    events = new BuildEvents();
-    w = new FsWatchNormalizer(config, events);
+    compilerCtx = mockCompilerCtx();
+    w = new FsWatchNormalizer(config, compilerCtx);
     w.queue = () => {/**/};
   });
 
   it('filesUpdated', async () => {
     const p1 = new Promise<d.FsWatchResults>(resolve => {
-      events.subscribe('fsChange', resolve);
+      compilerCtx.events.subscribe('fsChange', resolve);
     });
 
     w.fileUpdate('cmp-a.css');
@@ -31,7 +30,7 @@ describe('FsWatchNormalizer', () => {
     expect(r1.filesUpdated).toEqual(['cmp-a.css', 'cmp-a.tsx']);
 
     const p2 = new Promise<d.FsWatchResults>(resolve => {
-      events.subscribe('fsChange', resolve);
+      compilerCtx.events.subscribe('fsChange', resolve);
     });
 
     w.fileUpdate('cmp-a.css');
@@ -46,7 +45,7 @@ describe('FsWatchNormalizer', () => {
 
   it('dirDelete', async () => {
     const p = new Promise<d.FsWatchResults>(resolve => {
-      events.subscribe('fsChange', resolve);
+      compilerCtx.events.subscribe('fsChange', resolve);
     });
 
     w.dirDelete('delete-1');
@@ -60,7 +59,7 @@ describe('FsWatchNormalizer', () => {
 
   it('dirsAdded', async () => {
     const p = new Promise<d.FsWatchResults>(resolve => {
-      events.subscribe('fsChange', resolve);
+      compilerCtx.events.subscribe('fsChange', resolve);
     });
 
     w.dirAdd('add-1');
@@ -74,7 +73,7 @@ describe('FsWatchNormalizer', () => {
 
   it('filesAdded', async () => {
     const p = new Promise<d.FsWatchResults>(resolve => {
-      events.subscribe('fsChange', resolve);
+      compilerCtx.events.subscribe('fsChange', resolve);
     });
 
     w.fileAdd('add-1');
@@ -88,7 +87,7 @@ describe('FsWatchNormalizer', () => {
 
   it('filesDeleted', async () => {
     const p = new Promise<d.FsWatchResults>(resolve => {
-      events.subscribe('fsChange', resolve);
+      compilerCtx.events.subscribe('fsChange', resolve);
     });
 
     w.fileDelete('delete-1');

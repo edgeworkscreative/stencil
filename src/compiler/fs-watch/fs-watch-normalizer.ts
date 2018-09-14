@@ -11,7 +11,7 @@ export class FsWatchNormalizer {
   private filesUpdated: string[] = [];
   private flushTmrId: any;
 
-  constructor(private config: d.Config, private events: d.BuildEvents) {}
+  constructor(private config: d.Config, private compilerCtx: d.CompilerCtx) {}
 
   fileUpdate(filePath: string) {
     filePath = normalizePath(filePath);
@@ -84,7 +84,7 @@ export class FsWatchNormalizer {
     this.flushTmrId = setTimeout(this.flush.bind(this), 40);
   }
 
-  flush() {
+  async flush() {
     // create the watch results from all that we've learned today
     const fsWatchResults: d.FsWatchResults = {
       dirsAdded: this.dirsAdded.slice(),
@@ -102,15 +102,15 @@ export class FsWatchNormalizer {
     this.filesUpdated.length = 0;
 
     // send out the event of what we've learend
-    this.events.emit('fsChange', fsWatchResults);
+    this.compilerCtx.events.emit('fsChange', (this.config.events && this.config.events.fsChange) ? (await this.config.events.fsChange(this.config, this.compilerCtx, fsWatchResults)) : fsWatchResults);
   }
 
   subscribe() {
-    this.events.subscribe('fileUpdate', this.fileUpdate.bind(this));
-    this.events.subscribe('fileAdd', this.fileAdd.bind(this));
-    this.events.subscribe('fileDelete', this.fileDelete.bind(this));
-    this.events.subscribe('dirAdd', this.dirAdd.bind(this));
-    this.events.subscribe('dirDelete', this.dirDelete.bind(this));
+    this.compilerCtx.events.subscribe('fileUpdate', this.fileUpdate.bind(this));
+    this.compilerCtx.events.subscribe('fileAdd', this.fileAdd.bind(this));
+    this.compilerCtx.events.subscribe('fileDelete', this.fileDelete.bind(this));
+    this.compilerCtx.events.subscribe('dirAdd', this.dirAdd.bind(this));
+    this.compilerCtx.events.subscribe('dirDelete', this.dirDelete.bind(this));
   }
 
   private log(msg: string, filePath: string) {

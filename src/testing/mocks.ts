@@ -14,6 +14,7 @@ import { TestingLogger } from './testing-logger';
 import { TestingSystem } from './testing-sys';
 import { validateConfig } from '../compiler/config/validate-config';
 import { MockCustomEvent, MockDocument, MockWindow } from '@stencil/core/mock-doc';
+import {BuildEvents} from '../compiler/events';
 
 
 export function mockWindow() {
@@ -93,7 +94,8 @@ export function mockCompilerCtx() {
     fs: new InMemoryFileSystem(mockFs(), { path: require('path') } as any),
     collections: [],
     appFiles: {},
-    cache: mockCache()
+    cache: mockCache(),
+    events: new BuildEvents()
   };
 
   return compilerCtx;

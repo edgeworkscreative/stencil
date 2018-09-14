@@ -111,6 +111,7 @@ export interface StencilConfig {
   buildLogFilePath?: string;
   cacheDir?: string;
   commonjs?: BundlingConfig;
+  events?: CompilerEvents;
   nodeResolve?: NodeResolveConfig;
   rollupConfig?: RollupConfig;
   devInspector?: boolean;
@@ -134,6 +135,18 @@ export interface StencilConfig {
   watch?: boolean;
   watchIgnoredRegex?: RegExp;
   writeLog?: boolean;
+}
+
+export interface CompilerEvents {
+  buildFinish?: (config: d.Config, compilerCtx: d.CompilerCtx, fsWatchResults: d.FsWatchResults) => Promise<void>;
+  buildNoChange?: (config: d.Config, compilerCtx: d.CompilerCtx, fsWatchResults: d.FsWatchResults) => Promise<void>;
+  buildLog?: (config: d.Config, compilerCtx: d.CompilerCtx, fsWatchResults: d.FsWatchResults) => Promise<void>;
+  dirAdd?: (config: d.Config, compilerCtx: d.CompilerCtx, dirPath: string) => Promise<string>;
+  dirDelete?: (config: d.Config, compilerCtx: d.CompilerCtx, dirPath: string) => Promise<string>;
+  fileUpdate?: (config: d.Config, compilerCtx: d.CompilerCtx, filePath: string) => Promise<string>;
+  fileAdd?: (config: d.Config, compilerCtx: d.CompilerCtx, filePath: string) => Promise<string>;
+  fileDelete?: (config: d.Config, compilerCtx: d.CompilerCtx, filePath: string) => Promise<string>;
+  fsChange?: (config: d.Config, compilerCtx: d.CompilerCtx, fsWatchResults: d.FsWatchResults) => Promise<d.FsWatchResults>;
 }
 
 export interface Config extends StencilConfig {
