@@ -12,7 +12,7 @@ export function initFsWatch(config: d.Config, compilerCtx: d.CompilerCtx, buildC
 
   buildCtx.debug(`initFsWatch: ${config.sys.path.relative(config.rootDir, config.srcDir)}`);
 
-  const fsWatchNormalizer = new FsWatchNormalizer(config, compilerCtx.events);
+  const fsWatchNormalizer = new FsWatchNormalizer(config, compilerCtx);
   fsWatchNormalizer.subscribe();
   compilerCtx.hasWatch = true;
 
