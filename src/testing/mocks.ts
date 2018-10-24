@@ -13,8 +13,9 @@ import { TestingFs } from './testing-fs';
 import { TestingLogger } from './testing-logger';
 import { TestingSystem } from './testing-sys';
 import { validateConfig } from '../compiler/config/validate-config';
-import { MockCustomEvent, MockDocument, MockWindow } from '@stencil/core/mock-doc';
+import { MockCustomEvent} from '@stencil/core/mock-doc';
 import {BuildEvents} from '../compiler/events';
+import {mockDocument, mockWindow} from '../mock-doc';
 
 
 export { mockDocument, mockWindow };
