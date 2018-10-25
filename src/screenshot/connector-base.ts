@@ -20,6 +20,7 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
   buildUrl: string;
   previewUrl: string;
   buildTimestamp: number;
+  appNamespace: string;
   screenshotDir: string;
   imagesDir: string;
   buildsDir: string;
@@ -30,6 +31,8 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
   allowableMismatchedRatio: number;
   allowableMismatchedPixels: number;
   pixelmatchThreshold: number;
+  timeoutBeforeScreenshot: number;
+  pixelmatchModulePath: string;
 
   async initBuild(opts: d.ScreenshotConnectorOptions) {
     this.logger = opts.logger;
@@ -43,6 +46,9 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
     this.cacheDir = opts.cacheDir;
     this.packageDir = opts.packageDir;
     this.rootDir = opts.rootDir;
+    this.appNamespace = opts.appNamespace;
+    this.timeoutBeforeScreenshot = typeof opts.timeoutBeforeScreenshot === 'number' ? opts.timeoutBeforeScreenshot : 4;
+    this.pixelmatchModulePath = opts.pixelmatchModulePath;
 
     if (!opts.logger) {
       throw new Error(`logger option required`);
@@ -129,12 +135,15 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
         message: this.buildMessage,
         author: this.buildAuthor,
         url: this.buildUrl,
+        previewUrl: this.previewUrl,
+        appNamespace: this.appNamespace,
         timestamp: this.buildTimestamp,
         screenshots: screenshots
       };
     }
 
     const results: d.ScreenshotBuildResults = {
+      appNamespace: this.appNamespace,
       masterBuild: masterBuild,
       currentBuild: {
         id: this.buildId,
@@ -142,6 +151,7 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
         author: this.buildAuthor,
         url: this.buildUrl,
         previewUrl: this.previewUrl,
+        appNamespace: this.appNamespace,
         timestamp: this.buildTimestamp,
         screenshots: screenshots
       },
@@ -162,6 +172,7 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
           previewUrl: this.previewUrl,
         },
         url: null,
+        appNamespace: this.appNamespace,
         timestamp: this.buildTimestamp,
         diffs: []
       }
@@ -286,7 +297,9 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
       updateMaster: this.updateMaster,
       allowableMismatchedPixels: this.allowableMismatchedPixels,
       allowableMismatchedRatio: this.allowableMismatchedRatio,
-      pixelmatchThreshold: this.pixelmatchThreshold
+      pixelmatchThreshold: this.pixelmatchThreshold,
+      timeoutBeforeScreenshot: this.timeoutBeforeScreenshot,
+      pixelmatchModulePath: this.pixelmatchModulePath
     };
 
     return JSON.stringify(screenshotBuild);

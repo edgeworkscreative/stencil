@@ -16,6 +16,7 @@ export interface ScreenshotConnector {
 
 
 export interface ScreenshotBuildResults {
+  appNamespace: string;
   masterBuild: d.ScreenshotBuild;
   currentBuild: d.ScreenshotBuild;
   compare: ScreenshotCompareResults;
@@ -40,6 +41,7 @@ export interface ScreenshotCompareResults {
   };
   timestamp: number;
   url: string;
+  appNamespace: string;
   diffs: d.ScreenshotDiff[];
 }
 
@@ -50,6 +52,7 @@ export interface ScreenshotConnectorOptions {
   buildAuthor?: string;
   buildUrl?: string;
   previewUrl?: string;
+  appNamespace: string;
   buildTimestamp: number;
   logger: d.Logger;
   rootDir: string;
@@ -63,6 +66,8 @@ export interface ScreenshotConnectorOptions {
   allowableMismatchedPixels?: number;
   allowableMismatchedRatio?: number;
   pixelmatchThreshold?: number;
+  timeoutBeforeScreenshot?: number;
+  pixelmatchModulePath?: string;
 }
 
 
@@ -79,6 +84,17 @@ export interface ScreenshotBuildData {
   pixelmatchThreshold: number;
   masterScreenshots: {[screenshotId: string]: string};
   cache: {[cacheKey: string]: number};
+  timeoutBeforeScreenshot: number;
+  pixelmatchModulePath: string;
+}
+
+
+export interface PixelMatchInput {
+  imageAPath: string;
+  imageBPath: string;
+  width: number;
+  height: number;
+  pixelmatchThreshold: number;
 }
 
 
@@ -88,6 +104,7 @@ export interface ScreenshotBuild {
   author?: string;
   url?: string;
   previewUrl?: string;
+  appNamespace: string;
   timestamp: number;
   screenshots: Screenshot[];
 }
