@@ -29,6 +29,7 @@ export const RESERVED_PROPERTIES: string[] = [
   'ael',
   'rel',
   'raf',
+  'asyncQueue',
   'read',
   'ref',
   'resourcesUrl',
@@ -102,6 +103,15 @@ export const RESERVED_PROPERTIES: string[] = [
   'getAttributes',
   'replaceAttributes',
 
+  /**
+   * VDom
+   */
+  'vtag',
+  'vchildren',
+  'vtext',
+  'vattrs',
+  'vkey',
+  'vname',
 
   /**
    * Web Standards / DOM
@@ -123,9 +133,12 @@ export const RESERVED_PROPERTIES: string[] = [
   'class',
   'classList',
   'className',
+  'clearMarks',
+  'clearMeasures',
   'cloneNode',
   'closest',
   'composed',
+  'configurable',
   'connectedCallback',
   'content',
   'createComment',
@@ -168,6 +181,8 @@ export const RESERVED_PROPERTIES: string[] = [
   'location',
   'log',
   'keyCode',
+  'mark',
+  'measure',
   'match',
   'matches',
   'matchesSelector',
@@ -215,8 +230,15 @@ export const RESERVED_PROPERTIES: string[] = [
   'text',
   'textContent',
   'timeRemaining',
+  'value',
   'warn',
   'webkitMatchesSelector',
   'window',
-  'HTMLElement'
+  'HTMLElement',
+
+  /** CSS Vars Shim */
+  'createHostStyle',
+  'initShim',
+  'customStyleShim',
+  'updateHost'
 ];

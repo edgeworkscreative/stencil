@@ -1,6 +1,6 @@
 import * as d from '../../declarations';
 import { h } from '../../renderer/vdom/h';
-import { MockedPlatform, mockConnect, mockDefine, mockPlatform, waitForLoad } from '../../testing/mocks';
+import { MockedPlatform, mockConnect, mockDefine, mockPlatform, testingPerf, waitForLoad } from '../../testing/mocks';
 import { NODE_TYPE } from '../../util/constants';
 import { queueUpdate } from '../update';
 import { getDefaultBuildConditionals } from '../../util/build-conditionals';
@@ -12,7 +12,7 @@ describe('instance update', () => {
 
   beforeEach(() => {
     plt = mockPlatform();
-    __BUILD_CONDITIONALS__ = getDefaultBuildConditionals();
+    _BUILD_ = getDefaultBuildConditionals();
   });
 
 
@@ -30,7 +30,7 @@ describe('instance update', () => {
     });
 
     const node = await mockConnect(plt, '<ion-test></ion-test>');
-    __BUILD_CONDITIONALS__.hostData = false;
+    _BUILD_.hostData = false;
     const elm = await waitForLoad(plt, node, 'ion-test');
     const vnode = plt.vnodeMap.get(elm);
     expect(vnode.elm.textContent).toBe('88');
@@ -38,7 +38,7 @@ describe('instance update', () => {
     const instance = plt.instanceMap.get(elm);
     instance.value = '99';
 
-    queueUpdate(plt, elm);
+    queueUpdate(plt, elm, testingPerf);
 
     await plt.$flushQueue();
 

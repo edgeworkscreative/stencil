@@ -158,6 +158,7 @@ export interface CompilerEvents {
 
 export interface Config extends StencilConfig {
   buildAppCore?: boolean;
+  buildDocs?: boolean;
   configPath?: string;
   cwd?: string;
   flags?: ConfigFlags;
@@ -219,6 +220,7 @@ export interface ConfigFlags {
   debug?: boolean;
   dev?: boolean;
   docs?: boolean;
+  docsApi?: string;
   docsJson?: string;
   e2e?: boolean;
   emulate?: string;
@@ -232,6 +234,7 @@ export interface ConfigFlags {
   port?: number;
   prerender?: boolean;
   prod?: boolean;
+  profile?: boolean;
   root?: string;
   screenshot?: boolean;
   screenshotConnector?: string;
@@ -310,7 +313,7 @@ export interface ConfigBundle {
 
 
 export interface ServiceWorkerConfig {
-  // https://workboxjs.org/reference-docs/latest/module-workbox-build.html#.Configuration
+  // https://developers.google.com/web/tools/workbox/modules/workbox-build#full_generatesw_config
   swDest?: string;
   swSrc?: string;
   globPatterns?: string[];

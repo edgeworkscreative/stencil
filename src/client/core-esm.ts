@@ -35,28 +35,27 @@ export function defineCustomElement(win: Window, cmpData: d.ComponentHostData | 
     createComponentOnReadyPrototype(win, namespace, (win as any).HTMLElement.prototype);
   }
 
-  return new Promise(resolve => {
+  return applyPolyfills(win).then(() => {
 
-    applyPolyfills(win, () => {
+    if (!pltMap[namespace]) {
+      const Context: d.CoreContext = {};
+      const resourcesUrl = opts.resourcesUrl || './';
 
-      if (!pltMap[namespace]) {
-        const Context: d.CoreContext = {};
-        const resourcesUrl = opts.resourcesUrl || './';
+      appGlobal(namespace, Context, win, doc, resourcesUrl, hydratedCssClass);
 
-        appGlobal(namespace, Context, win, doc, resourcesUrl, hydratedCssClass);
+      // create a platform for this namespace
+      pltMap[namespace] = createPlatformMain(
+        namespace,
+        Context,
+        win,
+        doc,
+        resourcesUrl,
+        hydratedCssClass,
+        cmpDataArray
+      );
+    }
 
-        // create a platform for this namespace
-        pltMap[namespace] = createPlatformMain(
-          namespace,
-          Context,
-          win,
-          doc,
-          resourcesUrl,
-          hydratedCssClass,
-          cmpDataArray
-        );
-      }
-
+    function defineComponents() {
       // polyfills have been applied if need be
       (cmpData as d.ComponentHostData[]).forEach(c => {
         let HostElementConstructor: any;
@@ -85,9 +84,17 @@ export function defineCustomElement(win: Window, cmpData: d.ComponentHostData | 
           HostElementConstructor
         );
       });
+    }
 
-      resolve();
-    });
+    if (_BUILD_.cssVarShim && (window as any).customStyleShim) {
+      pltMap[namespace].customStyle = (window as any).customStyleShim;
+
+      pltMap[namespace].customStyle.initShim().then(defineComponents);
+
+    } else {
+      defineComponents();
+    }
+
   });
 }
 

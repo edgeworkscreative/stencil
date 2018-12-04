@@ -23,10 +23,17 @@ export const config: Config = {
     { src: 'noscript.js' }
   ],
   excludeSrc: [],
+  globalScript: 'test-app/global.ts',
   globalStyle: 'test-app/style-plugin/global-sass-entry.scss',
   plugins: [
     builtins(),
     globals(),
     sass()
-  ]
+  ],
+  devServer: {
+    historyApiFallback: {
+      disableDotRule: true,
+      index: 'index.html'
+    }
+  }
 };
