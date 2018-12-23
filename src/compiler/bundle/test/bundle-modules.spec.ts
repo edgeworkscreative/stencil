@@ -16,7 +16,6 @@ describe('bundle-module', () => {
       await c.fs.commit();
     });
 
-
     it('should build 2 bundles of 3 components', async () => {
       c.config.bundles = [
         { components: ['cmp-a', 'cmp-b'] },
@@ -70,12 +69,13 @@ describe('bundle-module', () => {
       const r = await c.build();
       expect(r.diagnostics).toEqual([]);
 
+      console.log(c.fs.keys);
       expectFiles(c.fs, [
         path.join(root, 'www', 'build', 'app', 'cmp-a.entry.js'),
         path.join(root, 'www', 'build', 'app', 'cmp-b.entry.js'),
         path.join(root, 'www', 'build', 'app', 'cmp-a.sc.entry.js'),
         path.join(root, 'www', 'build', 'app', 'cmp-b.sc.entry.js'),
-        path.join(root, 'www', 'build', 'app', 'chunk-304ba7c3.js'),
+        path.join(root, 'www', 'build', 'app', 'chunk-696f2b54.js'),
       ]);
     });
 

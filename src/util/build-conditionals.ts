@@ -1,7 +1,7 @@
 import * as d from '../declarations';
 import { DEFAULT_STYLE_MODE, ENCAPSULATION, MEMBER_TYPE, PROP_TYPE } from './constants';
 import { isTsFile } from '../compiler/util';
-import { shouldPrerender } from '../compiler/prerender/prerender-app';
+import { shouldPrerender, shouldPrerenderExternal } from '../compiler/prerender/prerender-app';
 
 
 export function getDefaultBuildConditionals(): d.BuildConditionals {
@@ -14,6 +14,7 @@ export function getDefaultBuildConditionals(): d.BuildConditionals {
     slotPolyfill: true,
     ssrServerSide: true,
     prerenderClientSide: true,
+    prerenderExternal: false,
     devInspector: true,
     hotModuleReplacement: true,
     verboseError: true,
@@ -89,6 +90,7 @@ export async function setBuildConditionals(
     cssVarShim: false,
     ssrServerSide: false,
     prerenderClientSide: false,
+    prerenderExternal: false,
     shadowDom: false,
     scoped: false,
     slotPolyfill: false,
@@ -132,8 +134,8 @@ export async function setBuildConditionals(
   if (coreId === 'core') {
     // modern build
     coreBuild.browserModuleLoader = true;
-    coreBuild.slotPolyfill = (coreBuild.scoped && buildCtx.hasSlot);
     coreBuild.prerenderClientSide = shouldPrerender(config);
+    coreBuild.prerenderExternal = shouldPrerenderExternal(config);
     compilerCtx.lastBuildConditionalsBrowserEsm = coreBuild;
 
   } else if (coreId === 'core.pf') {
@@ -142,8 +144,8 @@ export async function setBuildConditionals(
     coreBuild.es5 = true;
     coreBuild.polyfills = true;
     coreBuild.cssVarShim = true;
-    coreBuild.slotPolyfill = !!(buildCtx.hasSlot);
     coreBuild.prerenderClientSide = shouldPrerender(config);
+    coreBuild.prerenderExternal = shouldPrerenderExternal(config);
     compilerCtx.lastBuildConditionalsBrowserEs5 = coreBuild;
 
   } else if (coreId === 'esm.es5') {
@@ -151,6 +153,7 @@ export async function setBuildConditionals(
     coreBuild.es5 = true;
     coreBuild.externalModuleLoader = true;
     coreBuild.cssVarShim = true;
+    coreBuild.polyfills = true;
     coreBuild.slotPolyfill = true;
     compilerCtx.lastBuildConditionalsEsmEs5 = coreBuild;
 
@@ -163,6 +166,8 @@ export async function setBuildConditionals(
 
   // TODO: hasSlot does not account for dependencies
   coreBuild.slotPolyfill = true;
+  // TODO: hasSvg does not account for dependencies
+  coreBuild.hasSvg = true;
 
   return coreBuild;
 }
