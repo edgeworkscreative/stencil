@@ -1,6 +1,7 @@
 import * as d from '../../declarations';
 import { dashToPascalCase } from '../../util/helpers';
 import { MEMBER_TYPE } from '../../util/constants';
+import { isDocsPublic } from '../util';
 
 
 export async function generateAngularProxies(config: d.Config, compilerCtx: d.CompilerCtx, cmpRegistry: d.ComponentRegistry) {
@@ -16,7 +17,7 @@ export async function generateAngularProxies(config: d.Config, compilerCtx: d.Co
 function getComponents(excludeComponents: string[], cmpRegistry: d.ComponentRegistry): d.ComponentMeta[] {
   return Object.keys(cmpRegistry)
     .map(key => cmpRegistry[key])
-    .filter(c => !excludeComponents.includes(c.tagNameMeta))
+    .filter(c => !excludeComponents.includes(c.tagNameMeta) && isDocsPublic(c.jsdoc))
     .sort((a, b) => {
       if (a.tagNameMeta < b.tagNameMeta) return -1;
       if (a.tagNameMeta > b.tagNameMeta) return 1;
@@ -43,8 +44,6 @@ async function angularDirectiveProxyOutput(config: d.Config, compilerCtx: d.Comp
       angularImports.push('Directive');
     } else {
       angularImports.push('Component');
-      angularImports.push('ViewEncapsulation');
-      angularImports.push('ChangeDetectionStrategy');
       angularImports.push('ChangeDetectorRef');
     }
   }
@@ -82,10 +81,12 @@ import { ${angularImports.sort().join(', ')} } from '@angular/core';
 
 function inputsAuxFunction() {
   return `
-export function proxyInputs(instance: any, el: any, props: string[]) {
-  props.forEach(propName => {
-    Object.defineProperty(instance, propName, {
-      get: () => el[propName], set: (val: any) => el[propName] = val
+export function proxyInputs(Cmp: any, inputs: string[]) {
+  const Prototype = Cmp.prototype;
+  inputs.forEach(item => {
+    Object.defineProperty(Prototype, item, {
+      get() { return this.el[item]; },
+      set(val: any) { this.el[item] = val; },
     });
   });
 }`;
@@ -102,16 +103,13 @@ export function proxyOutputs(instance: any, el: any, events: string[]) {
 
 function methodsAuxFunction() {
   return `
-export function proxyMethods(instance: any, el: any, methods: string[]) {
+export function proxyMethods(Cmp: any, methods: string[]) {
+  const Prototype = Cmp.prototype;
   methods.forEach(methodName => {
-    Object.defineProperty(instance, methodName, {
-      get: function() {
-        return function() {
-          const args = arguments;
-          return el.componentOnReady().then((el: any) => el[methodName].apply(el, args));
-        };
-      }
-    });
+    Prototype[methodName] = function() {
+      const args = arguments;
+      return this.el.componentOnReady().then((el: any) => el[methodName].apply(el, args));
+    };
   });
 }
 `;
@@ -154,7 +152,6 @@ function generateProxy(cmpMeta: d.ComponentMeta, useDirectives: boolean) {
   const hasInputs = inputs.length > 0;
   const hasOutputs = outputs.length > 0;
   const hasMethods = methods.length > 0;
-  const hasContructor = hasInputs || hasOutputs || hasMethods;
 
   // Generate Angular @Directive
   const decorator = useDirectives ? 'Directive' : 'Component';
@@ -163,8 +160,7 @@ function generateProxy(cmpMeta: d.ComponentMeta, useDirectives: boolean) {
   ];
   if (!useDirectives) {
     directiveOpts.push(
-      `changeDetection: ChangeDetectionStrategy.OnPush`,
-      `encapsulation: ViewEncapsulation.None`,
+      `changeDetection: 0`,
       `template: '<ng-content></ng-content>'`
     );
   }
@@ -183,37 +179,22 @@ export class ${tagNameAsPascal} {`];
     lines.push(`  ${output}!: EventEmitter<CustomEvent>;`);
   });
 
-  // Generate component constructor
-  if (hasContructor) {
-    if (useDirectives) {
-      lines.push(`
-  constructor(r: ElementRef) {
-    const el = r.nativeElement;`);
-    } else {
-      lines.push(`
-  constructor(c: ChangeDetectorRef, r: ElementRef) {
+  lines.push('  el: HTMLElement');
+  lines.push(`  constructor(c: ChangeDetectorRef, r: ElementRef) {
     c.detach();
-    const el = r.nativeElement;`);
-    }
+    this.el = r.nativeElement;`);
+  if (hasOutputs) {
+    lines.push(`    proxyOutputs(this, this.el, ['${outputs.join(`', '`)}']);`);
   }
+  lines.push(`  }`);
+  lines.push(`}`);
 
   if (hasMethods) {
-    lines.push(`    proxyMethods(this, el, ['${methods.join(`', '`)}']);`);
+    lines.push(`proxyMethods(${tagNameAsPascal}, ['${methods.join(`', '`)}']);`);
   }
-
   if (hasInputs) {
-    lines.push(`    proxyInputs(this, el, ['${inputs.join(`', '`)}']);`);
+    lines.push(`proxyInputs(${tagNameAsPascal}, ['${inputs.join(`', '`)}']);`);
   }
-
-  if (hasOutputs) {
-    lines.push(`    proxyOutputs(this, el, ['${outputs.join(`', '`)}']);`);
-  }
-
-  if (hasContructor) {
-    lines.push(`  }`);
-  }
-
-  lines.push(`}`);
 
   return {
     text: lines.join('\n'),
@@ -226,18 +207,20 @@ export class ${tagNameAsPascal} {`];
 function getInputs(cmpMeta: d.ComponentMeta) {
   return Object.keys(cmpMeta.membersMeta || {}).filter(memberName => {
     const m = cmpMeta.membersMeta[memberName];
-    return m.memberType === MEMBER_TYPE.Prop || m.memberType === MEMBER_TYPE.PropMutable;
+    return isDocsPublic(m.jsdoc) && (m.memberType === MEMBER_TYPE.Prop || m.memberType === MEMBER_TYPE.PropMutable);
   });
 }
 
 function getOutputs(cmpMeta: d.ComponentMeta) {
-  return (cmpMeta.eventsMeta || []).map(eventMeta => eventMeta.eventName);
+  return (cmpMeta.eventsMeta || [])
+    .filter(e => isDocsPublic(e.jsdoc))
+    .map(eventMeta => eventMeta.eventName);
 }
 
 function getMethods(cmpMeta: d.ComponentMeta) {
   return Object.keys(cmpMeta.membersMeta || {}).filter(memberName => {
     const m = cmpMeta.membersMeta[memberName];
-    return m.memberType === MEMBER_TYPE.Method;
+    return isDocsPublic(m.jsdoc) && m.memberType === MEMBER_TYPE.Method;
   });
 }
 
