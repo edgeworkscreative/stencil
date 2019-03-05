@@ -1,4 +1,5 @@
 import * as d from '../declarations';
+import { catchError } from '../compiler/util';
 import { createDomApi } from '../renderer/dom-api';
 import { createQueueServer } from './queue-server';
 import { createRendererPatch } from '../renderer/vdom/patch';
@@ -14,6 +15,7 @@ import { proxyController } from '../core/proxy-controller';
 import { queueUpdate } from '../core/update';
 import { serverAttachStyles, serverInitStyle } from './server-styles';
 import { toDashCase } from '../util/helpers';
+import {DEFAULT_MODE} from "../compiler/prerender/host-config";
 
 
 export function createPlatformServer(
@@ -68,8 +70,12 @@ export function createPlatformServer(
   // V8 Context provides an isolated global environment
   config.sys.vm.createContext(compilerCtx, outputTarget, win);
 
-  // execute the global scripts (if there are any)
-  runGlobalScripts();
+  try {
+    // execute the global scripts (if there are any)
+    runGlobalScripts();
+  } catch (e) {
+    catchError(diagnostics, e);
+  }
 
   // internal id increment for unique ids
   let ids = 0;
@@ -308,7 +314,18 @@ export function createPlatformServer(
       return;
     }
 
-    config.sys.vm.runInContext(compilerCtx.appFiles.global, win);
+    if (!win.matchMedia) {
+      win.matchMedia = () => {
+        return { matches: true };
+      };
+    }
+
+    const globalContext = Object.assign(win, {
+      x: compilerCtx,
+      r: Context.resourcesUrl
+    });
+
+    config.sys.vm.runInContext(compilerCtx.appFiles.global, globalContext);
   }
 
   function onError(err: Error, type: RUNTIME_ERROR, elm: d.HostElement, appFailure: boolean) {
@@ -374,7 +391,7 @@ export function createPlatformServer(
 export function getComponentBundleFilename(cmpMeta: d.ComponentMeta, modeName: string) {
   let bundleId: string = (typeof cmpMeta.bundleIds === 'string') ?
     cmpMeta.bundleIds :
-    ((cmpMeta.bundleIds as d.BundleIds)[modeName] || (cmpMeta.bundleIds as d.BundleIds)[DEFAULT_STYLE_MODE]);
+    ((cmpMeta.bundleIds as d.BundleIds)[modeName] || (cmpMeta.bundleIds as d.BundleIds)[DEFAULT_MODE] || (cmpMeta.bundleIds as d.BundleIds)[DEFAULT_STYLE_MODE]);
 
   if (cmpMeta.encapsulationMeta === ENCAPSULATION.ScopedCss || cmpMeta.encapsulationMeta === ENCAPSULATION.ShadowDom) {
     bundleId += '.sc';

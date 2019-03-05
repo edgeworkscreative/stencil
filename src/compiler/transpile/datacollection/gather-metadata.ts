@@ -45,7 +45,8 @@ export function gatherMetadata(config: d.Config, compilerCtx: d.CompilerCtx, bui
       } catch ({message}) {
         const error = buildError(buildCtx.diagnostics);
         error.messageText = message;
-        error.relFilePath = tsSourceFile.fileName;
+        error.absFilePath = tsSourceFile.fileName;
+        error.relFilePath = config.sys.path.relative(config.rootDir, tsSourceFile.fileName);
       }
       return undefined;
     }
@@ -122,7 +123,7 @@ export function visitClass(
   };
 
   cmpMeta.eventsMeta = getEventDecoratorMeta(diagnostics, typeChecker, classNode, sourceFile);
-  cmpMeta.listenersMeta = getListenDecoratorMeta(typeChecker, classNode);
+  cmpMeta.listenersMeta = getListenDecoratorMeta(config, diagnostics, typeChecker, classNode, sourceFile);
 
   // watch meta collection MUST happen after prop/state decorator meta collection
   getWatchDecoratorMeta(diagnostics, classNode, cmpMeta);
