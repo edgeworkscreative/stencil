@@ -6,9 +6,9 @@ export function hasServiceWorkerChanges(config: d.Config, buildCtx: d.BuildCtx) 
   if (config.devMode && !config.flags.serviceWorker) {
     return false;
   }
-  const wwwServiceOutputs = (config.outputTargets as d.OutputTargetWww[]).filter(o => o.type === 'www' && o.serviceWorker && o.serviceWorker.swSrc);
+  const wwwServiceOutputs = (config.outputTargets as d.OutputTargetWww[]).filter(o => o.type === 'www' && o.serviceWorker && o.serviceWorker.workbox.swSrc);
   return wwwServiceOutputs.some(outputTarget => {
-    return buildCtx.filesChanged.some(fileChanged => config.sys.path.basename(fileChanged).toLowerCase() === config.sys.path.basename(outputTarget.serviceWorker.swSrc).toLowerCase());
+    return buildCtx.filesChanged.some(fileChanged => config.sys.path.basename(fileChanged).toLowerCase() === config.sys.path.basename(outputTarget.serviceWorker.workbox.swSrc).toLowerCase());
   });
 }
 

@@ -241,7 +241,7 @@ function addServiceWorkerNoCacheControl(config: d.Config, outputTarget: d.Output
     return;
   }
 
-  const url = getUrlFromFilePath(config, outputTarget, outputTarget.serviceWorker.swDest);
+  const url = getUrlFromFilePath(config, outputTarget, outputTarget.serviceWorker.workbox.swDest);
 
   hostConfig.hosting.rules.push({
     include: url,

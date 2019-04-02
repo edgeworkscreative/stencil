@@ -33,7 +33,7 @@ export function injectUnregisterServiceWorker(indexHtml: string) {
 
 
 async function getRegisterSwScript(swUrl: string, outputTarget: d.OutputTargetWww) {
-  return outputTarget.serviceWorker && outputTarget.serviceWorker.registrationScript ? outputTarget.serviceWorker.registrationScript(swUrl) : `
+  return outputTarget.serviceWorker && outputTarget.serviceWorker.hasOwnProperty('registrationScript') ? await outputTarget.serviceWorker.registrationScript(swUrl) : `
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('${swUrl}')

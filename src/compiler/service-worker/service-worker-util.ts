@@ -5,7 +5,7 @@ import { normalizePath } from '../util';
 export function generateServiceWorkerUrl(config: d.Config, outputTarget: d.OutputTargetWww) {
   let swUrl = normalizePath(config.sys.path.relative(
     outputTarget.dir,
-    outputTarget.serviceWorker.swDest
+    outputTarget.serviceWorker.workbox.swDest
   ));
 
   if (swUrl.charAt(0) !== '/') {

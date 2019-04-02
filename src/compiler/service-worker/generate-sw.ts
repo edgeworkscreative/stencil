@@ -59,7 +59,7 @@ async function generateSW(buildCtx: d.BuildCtx, serviceWorker: d.ServiceWorkerCo
   const timeSpan = buildCtx.createTimeSpan(`generate service worker started`);
 
   try {
-    await workbox.generateSW(serviceWorker);
+    await workbox.generateSW(serviceWorker.workbox);
     timeSpan.finish(`generate service worker finished`);
 
   } catch (e) {
@@ -84,20 +84,20 @@ async function injectManifest(buildCtx: d.BuildCtx, outputTarget: d.OutputTarget
 function ignoreLegacyBundles(config: d.Config, serviceWorker: d.ServiceWorkerConfig) {
   const ignorePattern = `**/${config.fsNamespace}/*.es5.entry.js`;
 
-  if (typeof serviceWorker.globIgnores === 'string') {
-    serviceWorker.globIgnores = [serviceWorker.globIgnores];
+  if (typeof serviceWorker.workbox.globIgnores === 'string') {
+    serviceWorker.workbox.globIgnores = [serviceWorker.workbox.globIgnores];
   }
 
-  serviceWorker.globIgnores = serviceWorker.globIgnores || [];
+  serviceWorker.workbox.globIgnores = serviceWorker.workbox.globIgnores || [];
 
-  if (!serviceWorker.globIgnores.includes(ignorePattern)) {
-    serviceWorker.globIgnores.push(ignorePattern);
+  if (!serviceWorker.workbox.globIgnores.includes(ignorePattern)) {
+    serviceWorker.workbox.globIgnores.push(ignorePattern);
   }
 }
 
 
 function hasSrcConfig(outputTarget: d.OutputTargetWww) {
-  return !!outputTarget.serviceWorker.swSrc;
+  return !!outputTarget.serviceWorker.workbox.swSrc;
 }
 
 
