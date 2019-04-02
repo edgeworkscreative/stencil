@@ -20,7 +20,7 @@ export async function updateIndexHtmlServiceWorker(config: d.Config, buildCtx: d
 export async function injectRegisterServiceWorker(config: d.Config, buildCtx: d.BuildCtx, outputTarget: d.OutputTargetWww, indexHtml: string) {
   const swUrl = generateServiceWorkerUrl(config, outputTarget);
 
-  const serviceWorker = getRegisterSwScript(swUrl);
+  const serviceWorker = await getRegisterSwScript(swUrl, outputTarget);
   const swHtml = `<script data-build="${buildCtx.timestamp}">${serviceWorker}</script>`;
 
   return appendSwScript(indexHtml, swHtml);
@@ -32,8 +32,8 @@ export function injectUnregisterServiceWorker(indexHtml: string) {
 }
 
 
-function getRegisterSwScript(swUrl: string) {
-  return `
+async function getRegisterSwScript(swUrl: string, outputTarget: d.OutputTargetWww) {
+  return outputTarget.serviceWorker && outputTarget.serviceWorker.hasOwnProperty('registrationScript') ? await outputTarget.serviceWorker.registrationScript(swUrl) : `
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('${swUrl}')

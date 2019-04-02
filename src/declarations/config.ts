@@ -315,8 +315,7 @@ export interface ConfigBundle {
   components: string[];
 }
 
-
-export interface ServiceWorkerConfig {
+export interface WorkboxConfig {
   // https://developers.google.com/web/tools/workbox/modules/workbox-build#full_generatesw_config
   swDest?: string;
   swSrc?: string;
@@ -337,6 +336,11 @@ export interface ServiceWorkerConfig {
   runtimeCaching?: any[];
   ignoreUrlParametersMatching?: any[];
   handleFetch?: boolean;
+}
+
+export interface ServiceWorkerConfig {
+  registrationScript?: (swUrl: string) => Promise<string>;
+  workbox: WorkboxConfig;
 }
 
 
