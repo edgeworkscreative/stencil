@@ -336,7 +336,6 @@ export interface WorkboxConfig {
   runtimeCaching?: any[];
   ignoreUrlParametersMatching?: any[];
   handleFetch?: boolean;
-  registrationScript?: (swUrl: string) => Promise<string>;
 }
 
 export interface ServiceWorkerConfig {
