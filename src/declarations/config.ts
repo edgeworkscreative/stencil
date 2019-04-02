@@ -337,6 +337,7 @@ export interface ServiceWorkerConfig {
   runtimeCaching?: any[];
   ignoreUrlParametersMatching?: any[];
   handleFetch?: boolean;
+  registrationScript?: (swUrl: string) => Promise<string>;
 }
 
 
